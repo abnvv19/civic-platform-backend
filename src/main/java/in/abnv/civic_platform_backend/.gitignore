@@ -1,0 +1,12 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Build files
+target/
+
+# Environment files
+.env
+
+# macOS
+.DS_Store
