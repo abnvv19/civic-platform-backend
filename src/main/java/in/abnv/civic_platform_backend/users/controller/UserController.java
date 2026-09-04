@@ -35,4 +35,5 @@ public class UserController {
     public String getProfile() {
         return "You are authenticated!";
     }
+
 }

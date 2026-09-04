@@ -3,6 +3,7 @@ package in.abnv.civic_platform_backend.jwt;
 
 import in.abnv.civic_platform_backend.users.entity.User;
 import in.abnv.civic_platform_backend.users.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
+    @PostConstruct
+    public void init() {
+        System.out.println("JWT FILTER HAS BEEN REGISTERED!");
+    }
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -39,22 +45,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        String email = jwtService.extractEmail(token);
+//        String email = jwtService.extractEmail(token);
+//
+//        User user = userRepository.findByEmail(email)
+//                .orElse(null);
+//
+//        if (user != null && jwtService.isTokenValid(token)) {
+//
+//            UsernamePasswordAuthenticationToken authentication =
+//                    new UsernamePasswordAuthenticationToken(
+//                            user,
+//                            null,
+//                            Collections.emptyList()
+//                    );
+//
+//            SecurityContextHolder.getContext()
+//                    .setAuthentication(authentication);
+//        }
+        try {
 
-        User user = userRepository.findByEmail(email)
-                .orElse(null);
+            String email = jwtService.extractEmail(token);
 
-        if (user != null && jwtService.isTokenValid(token)) {
+            System.out.println("Email extracted from token: " + email);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            Collections.emptyList()
-                    );
+            User user = userRepository.findByEmail(email)
+                    .orElse(null);
 
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+            if (user != null && jwtService.isTokenValid(token)) {
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                user,
+                                null,
+                                Collections.emptyList()
+                        );
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+
+                System.out.println("User authenticated successfully!");
+
+            } else {
+                System.out.println("User not found or token invalid!");
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("JWT ERROR: " + e.getMessage());
+
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
